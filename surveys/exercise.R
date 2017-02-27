@@ -7,12 +7,11 @@ library(ggplot2)
 data(api)
 
 # How many schools are in the full dataset?
-
+numSchools <- nrow(apipop) #6194
 
 # How many districts are there in the dataset (dnum)?
-
-
-
+View(apistrat)
+numDist <- length(unique(apipop$dname)) #757
 
 ###############################################################
 ################# Stratified sample, apistrat #################
@@ -21,35 +20,38 @@ data(api)
 
 
 # Use the `table` function to see how many schools are selected by school type (stype)
-
+table(apistrat$stype) # 100 elementary 50 high school 50 middle school
 
 # How does this compare the to breakdown of the fractions of school type in the full dataset?
-
+table(apipop$stype) # 4421 elementary 755 high school 1018 middle school 
 
 # Given that we sample by strata, what are the *probability weights* for each observation?
-
+weights <- table(apipop$stype) / table(apistrat$stype)
+print(weights)
 
 # What is the sum of probability weights column in the dataset?
-
+sum.weights <- sum(apistrat$pw) # 6194
 
 # Use the `table` function to see how probability weight varies by stype
-
+table(apistrat$pw, apistrat$stype)
 
 # Specify a stratified design 
 # We need to know stype, pw, AND fpc (# of schools of that type in pop)
-
+api.design <- svydesign(ids=~1, strata = ~stype, weights = ~pw, fpc = ~fpc, data = apistrat)
 
 # Specify a design without the finite population correction
 # We don't really need to know the fpc to calculate the mean, it only affects the standard error
+api.design2 <- svydesign(ids=~1, strata = ~stype, weights = ~pw, data = apistrat)
 
 # Compute the mean academic performance index (api) in 2000 in the full dataset
-
+mean(apipop$api00) # 664.7126
 
 # Using the stratified dataset, compute the unweighted mean api in 2000 
-
+mean(apistrat$api00) # 652.82
 
 # Compute the survey weighted mean api (using designs with/without FPC)
-
+svymean(~api00, api.design) # 662.29
+svymean(~api00, api.design2) # 662.29
 
 
 ############################################################
@@ -60,10 +62,12 @@ data(api)
 # Here, we sample *districts*, and take all schools in those districts
 
 # Use the `table` function to see which district numbers (dnum) are present in the full dataset
-
+table(apipop$dnum)
+length(unique(apipop$dnum)) # 757
 
 # Use the `table` function to see which district numbers are present in apiclus1
-
+table(apiclus1$dnum)
+length(unique(apiclus1$dnum)) # 15
 
 # What is the distribution of person weights in this sample?
 
