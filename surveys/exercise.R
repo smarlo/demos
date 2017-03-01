@@ -70,14 +70,19 @@ table(apiclus1$dnum)
 length(unique(apiclus1$dnum)) # 15
 
 # What is the distribution of person weights in this sample?
-
+plot(apiclus1$pw)
+unique(apiclus1$pw)
 
 # Specify multiple cluster designs: try with/without weights/fpc
 # We need to know the primary sampling unit (id) for each observation
-
+apiclus1.design <- svydesign(id=~dnum, weights=~pw, fpc=~fpc, data=apiclus1)
+design.no.weights <- svydesign(id=~dnum, fpc=~fpc, data=apiclus1)
+design.no.fpc <- svydesign(id=~dnum, weights=~pw, data=apiclus1)
 
 # Compute the survey weighted mean for each design specified above
-
+svymean(~api00, apiclus1.design) # 644.17, SE 23.542
+svymean(~api00, design.no.weights) # 644.17, SE 23.542
+svymean(~api00, design.no.fpc) # 644.17, SE 23.779
 
 
 ############################################################
